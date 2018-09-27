@@ -55,9 +55,10 @@ void *threadUser(thConnArg *);
 
 int initServer(connection *connection, int coda);
 int acceptCreate(connection *connection,  void* (*threadUser)(void *),void *argFx);
+int loginServerSide(thConnArg *thArg);
 
 ///Client FUNCTION
 int initClient(connection *c);
-int loginUserSide(connection *c);
+int loginUserSide(thConnArg *thArg);
 
 #endif //SOCKETDEMO_SOCKETCONNECT_H

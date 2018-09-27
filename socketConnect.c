@@ -37,10 +37,11 @@ void freeConnection(connection* con){
 
 void *threadUser(thConnArg * argTh){
 
-    mail *pack;
+    mail *pack = malloc(sizeof(mail));
+    argTh->arg = pack;
 
 
-    loginUserSide(&argTh->con);
+    loginServerSide(argTh);
 }
 
 
@@ -97,9 +98,19 @@ int initClient(connection *c)
     return 0;
 }
 
-int loginUserSide(connection *c){
+int loginServerSide(thConnArg *thArg){
     // vedere sendfile() su man, potrebbe servire per il login
-    printf("");
+
+    ssize_t bRead = 0;
+    metadata *mDServ = malloc(sizeof(metadata));
+
+    printf("Utente in fase di collegamento; socket univoco:%d\n",thArg->con.ds_sock);
+    int dimMD = sizeof(metadata); // dimensione metadata, serve per prendere dati corretti in read;
+    do{
+        bRead = read(thArg->con.ds_sock,mDServ+bRead, sizeof(mDServ-bRead));
+    } while (dimMD-bRead > 0);
 
 
+
+    return 0;
 }
