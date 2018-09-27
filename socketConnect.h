@@ -23,8 +23,8 @@
 
 typedef struct metadata_{
     size_t dim;
-    char sender[14];
-    char chat[14];
+    char sender[28];
+    char whoOrWhy[28];
 }metadata;
 
 typedef struct mail_{
@@ -49,7 +49,7 @@ typedef struct thConnArg_{
 connection* initSocket(u_int16_t port, char* IP);
 void freeConnection(connection* con);
 
-void *threadUser(void*);
+void *threadUser(thConnArg *);
 
 ///Server FUNCTION
 
@@ -58,6 +58,6 @@ int acceptCreate(connection *connection,  void* (*threadUser)(void *),void *argF
 
 ///Client FUNCTION
 int initClient(connection *c);
-int loginUser(connection *c);
+int loginUserSide(connection *c);
 
 #endif //SOCKETDEMO_SOCKETCONNECT_H

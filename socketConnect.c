@@ -35,8 +35,12 @@ void freeConnection(connection* con){
     free(con);
 }
 
-void *threadUser(void * argTh){
+void *threadUser(thConnArg * argTh){
 
+    mail *pack;
+
+
+    loginUserSide(&argTh->con);
 }
 
 
@@ -73,6 +77,7 @@ int acceptCreate(connection *c,  void* (*threadUser)(void *),void *arg)
     pthread_t tid;
     thConnArg *argTh=malloc(sizeof(thConnArg));
     argTh->arg = arg;
+    argTh->con = *conNew;
     pthread_create(&tid,NULL,threadUser,argTh);
     return 0;
 }
@@ -92,6 +97,9 @@ int initClient(connection *c)
     return 0;
 }
 
-int loginUser(connection *c){
+int loginUserSide(connection *c){
     // vedere sendfile() su man, potrebbe servire per il login
+    printf("");
+
+
 }
