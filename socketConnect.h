@@ -51,6 +51,8 @@ void freeConnection(connection* con);
 
 void *threadUser(thConnArg *);
 
+int writePack(thConnArg *thArg);
+
 ///Server FUNCTION
 
 int initServer(connection *connection, int coda);

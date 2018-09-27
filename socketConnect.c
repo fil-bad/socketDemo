@@ -17,18 +17,22 @@ connection* initSocket(u_int16_t port, char* IP)
     return con;
 }
 
-int writePack(mail *pack)
+int writePack(thConnArg *thArg)
 {
     /// la funzione si aspetta che il buffer non sia modificato durante l'invio
-    //size_t lenMess = pack->md.dim+ sizeof(metadata);
-    //char buffer[lenMess];
-    //memcpy(buffer, &pack->md, sizeof(metadata));
-    //memcpy(buffer + sizeof(metadata), pack->mex, pack->md.dim);
+    ssize_t bRead = 0;
+    metadata *mDServ = malloc(sizeof(metadata));
+
+    int dimMD = sizeof(metadata); // dimensione metadata, serve per prendere dati corretti in read;
+    do{
+        bRead = read(thArg->con.ds_sock,mDServ+bRead, sizeof(mDServ)-bRead);
+    } while (dimMD-bRead > 0);
+    return 0;
 }
 
 int readPack()
 {
-
+    return 0;
 }
 
 void freeConnection(connection* con){
@@ -100,16 +104,9 @@ int initClient(connection *c)
 
 int loginServerSide(thConnArg *thArg){
     // vedere sendfile() su man, potrebbe servire per il login
-
-    ssize_t bRead = 0;
-    metadata *mDServ = malloc(sizeof(metadata));
-
     printf("Utente in fase di collegamento; socket univoco:%d\n",thArg->con.ds_sock);
-    int dimMD = sizeof(metadata); // dimensione metadata, serve per prendere dati corretti in read;
-    do{
-        bRead = read(thArg->con.ds_sock,mDServ+bRead, sizeof(mDServ-bRead));
-    } while (dimMD-bRead > 0);
 
+    writePack(thArg);
 
 
     return 0;
