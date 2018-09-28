@@ -17,21 +17,41 @@ connection* initSocket(u_int16_t port, char* IP)
     return con;
 }
 
-int writePack(thConnArg *thArg)
+int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un mail
 {
     /// la funzione si aspetta che il buffer non sia modificato durante l'invio
+    ssize_t bWrite = 0;
+
+    ssize_t dimPack = sizeof(metadata) + pack->md.dim;
+    do{
+        bWrite = write(ds_sock,pack+bWrite, dimPack - bWrite);
+    } while (dimPack-bWrite > 0);
+
+    return 0;
+}
+
+int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
+{
     ssize_t bRead = 0;
     metadata *mDServ = malloc(sizeof(metadata));
 
     int dimMD = sizeof(metadata); // dimensione metadata, serve per prendere dati corretti in read;
     do{
-        bRead = read(thArg->con.ds_sock,mDServ+bRead, sizeof(mDServ)-bRead);
+        bRead = read(ds_sock,mDServ+bRead, sizeof(mDServ)-bRead);
     } while (dimMD-bRead > 0);
-    return 0;
-}
+    printf("Dim pack = %ld, Type = %d sender = %s, whoOrWhy = %s\n", mDServ->dim, mDServ->type,mDServ->sender,mDServ->whoOrWhy);
 
-int readPack()
-{
+    size_t dimMex = mDServ->dim;
+
+    pack->mex = malloc(dimMex);
+
+    bRead = 0; //rimetto a zero per la nuova lettura
+    do{
+        bRead = read(ds_sock,pack->mex+bRead, sizeof(pack->mex)-bRead);
+    } while (dimMex-bRead > 0);
+
+    printf("Message = %s\n",(char*)pack->mex);
+
     return 0;
 }
 
@@ -42,10 +62,8 @@ void freeConnection(connection* con){
 void *threadUser(thConnArg * argTh){
 
     mail *pack = malloc(sizeof(mail));
-    argTh->arg = pack;
 
-
-    loginServerSide(argTh);
+    loginServerSide(argTh->con.ds_sock, pack);
 }
 
 
@@ -102,11 +120,17 @@ int initClient(connection *c)
     return 0;
 }
 
-int loginServerSide(thConnArg *thArg){
+int loginServerSide(int ds_sock, mail *pack){
     // vedere sendfile() su man, potrebbe servire per il login
-    printf("Utente in fase di collegamento; socket univoco:%d\n",thArg->con.ds_sock);
+    printf("Utente in fase di collegamento; socket univoco:%d\n",ds_sock);
 
-    writePack(thArg);
+    readPack(ds_sock,pack);
+
+    printf("Utente = %s\n",(char *)pack->mex);
+    printf("Cerco corrispondenza utente e chat associate.\n");
+
+
+    writePack(ds_sock,pack);
 
 
     return 0;
