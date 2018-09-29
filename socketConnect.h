@@ -66,3 +66,10 @@ int initClient(connection *c);
 int loginUserSide(int sock, mail *pack);
 
 #endif //SOCKETDEMO_SOCKETCONNECT_H
+
+/* todo: creazione di due thread, uno che stara' in invio dati dal client, (threadFromClient)
+ *       e l'altro che stara' in ricezione dati verso il client; (threadToClient)
+ *       ognuno di essi processa i pacchetti che arrivano (o delega il lavoro a un terzo thread)
+ *       il ToC parte dopo il FromC (che si occupa della fase di login inizialmente);
+ *       vediamo se possiamo far spawnare un thread ad un altro thread, altrimenti usiamo un semaforo;
+ */
