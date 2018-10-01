@@ -67,6 +67,11 @@ void *threadUser(thConnArg * argTh){
 }
 
 int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex){
+    pack->md.dim = sizeof(mex);
+    pack->md.type = type;
+    memcpy(pack->md.whoOrWhy, whoOrWhy, strlen(whoOrWhy));
+    memcpy(pack->md.sender, sender, strlen(sender));
+    pack->mex = mex;
     return 0;
 }
 
@@ -157,6 +162,8 @@ int loginUserSide(int ds_sock, mail *pack){
     }
 
     writePack(ds_sock, pack);
+
+    readPack(ds_sock,pack);
 
 
 
