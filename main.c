@@ -58,8 +58,9 @@ int clientDemo(int argc, char *argv[])
     if(initClient(con) == -1){
         exit(-1);
     }
+    mail *pack = malloc(sizeof(mail));
 
-    if(loginUser(con)){
+    if(loginUserSide(con->ds_sock,pack) == -1){
         exit(-1);
     }
 

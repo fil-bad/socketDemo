@@ -105,7 +105,21 @@ int acceptCreate(connection *c,  void* (*threadUser)(void *),void *arg)
     return 0;
 }
 
+int loginServerSide(int ds_sock, mail *pack){
+    // vedere sendfile() su man, potrebbe servire per il login
+    printf("Utente in fase di collegamento; socket univoco:%d\n",ds_sock);
 
+    readPack(ds_sock,pack);
+
+    printf("Utente = %s\n",(char *)pack->mex);
+    printf("Cerco corrispondenza utente e chat associate.\n");
+
+
+    writePack(ds_sock,pack);
+
+
+    return 0;
+}
 
 ///Client FUNCTION
 
@@ -120,18 +134,6 @@ int initClient(connection *c)
     return 0;
 }
 
-int loginServerSide(int ds_sock, mail *pack){
-    // vedere sendfile() su man, potrebbe servire per il login
-    printf("Utente in fase di collegamento; socket univoco:%d\n",ds_sock);
-
-    readPack(ds_sock,pack);
-
-    printf("Utente = %s\n",(char *)pack->mex);
-    printf("Cerco corrispondenza utente e chat associate.\n");
-
-
-    writePack(ds_sock,pack);
-
-
+int loginUserSide(int ds_sock, mail *pack){
     return 0;
 }
