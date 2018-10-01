@@ -20,10 +20,11 @@
 #include <poll.h>
 
 #define MAX_DIM 1024
+#define fflush(stdin) while(getchar() != '\n')
 
 typedef struct metadata_{
     size_t dim;
-    int type;
+    int type; // dobbiamo definire dei tipi di comandi: es. 0 per il login => password in campo mex, ...
     char sender[28];
     char whoOrWhy[24];
 }metadata;
@@ -54,6 +55,8 @@ void *threadUser(thConnArg *);
 
 int readPack(int ds_sock, mail *pack);  // queste due funzioni prendono il pacchetto thread-specifico
 int writePack(int ds_sock, mail *pack); // ma all'interno contengono la struct mail con i dati
+
+int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex);
 
 ///Server FUNCTION
 

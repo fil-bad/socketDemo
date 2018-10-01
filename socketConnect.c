@@ -66,6 +66,9 @@ void *threadUser(thConnArg * argTh){
     loginServerSide(argTh->con.ds_sock, pack);
 }
 
+int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex){
+    return 0;
+}
 
 
 
@@ -135,5 +138,27 @@ int initClient(connection *c)
 }
 
 int loginUserSide(int ds_sock, mail *pack){
+
+    char buffUser[24];
+    char buffPass[28];
+    memset(buffUser, 0, sizeof(buffUser));
+    memset(buffPass, 0, sizeof(buffPass));
+
+    printf("Inserire credenziali per login.\nUtente: ");
+    scanf("%s",buffUser);
+    fflush(stdin);
+    printf("\nPassword:");
+    scanf("%s",buffPass);
+    fflush(stdin);
+    printf("\n");
+
+    if (fillPack(pack, 0, buffUser, buffPass, NULL) == -1){
+        return(-1);
+    }
+
+    writePack(ds_sock, pack);
+
+
+
     return 0;
 }
