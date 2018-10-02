@@ -106,13 +106,13 @@ int clientDemo(int argc, char *argv[])
         exit(-1);
     }
     mail *packSend = malloc(sizeof(mail));
-    packSend->mex=malloc(4096);
+    //packSend->mex=malloc(4096);
 
     do
     {
-
+        free(packSend->mex);
         antiSegFault:
-        scanf("%[^\n]", packSend->mex);
+        scanf("%m[^\n]", &packSend->mex);
         fflush(stdin);
 
         if (packSend->mex == NULL) goto antiSegFault;
