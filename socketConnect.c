@@ -43,6 +43,11 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
 
     size_t dimMex = mDServ->dim;
 
+    if (dimMex == 0) {
+        pack->mex = NULL;
+        return 0;
+    }
+
     pack->mex = malloc(dimMex);
 
     bRead = 0; //rimetto a zero per la nuova lettura
@@ -66,8 +71,8 @@ void *threadUser(thConnArg * argTh){
     loginServerSide(argTh->con.ds_sock, pack);
 }
 
-int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex){
-    pack->md.dim = sizeof(mex);
+int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int len){
+    pack->md.dim = len;
     pack->md.type = type;
     memcpy(pack->md.whoOrWhy, whoOrWhy, strlen(whoOrWhy));
     memcpy(pack->md.sender, sender, strlen(sender));
@@ -157,7 +162,7 @@ int loginUserSide(int ds_sock, mail *pack){
     fflush(stdin);
     printf("\n");
 
-    if (fillPack(pack, 0, buffUser, buffPass, NULL) == -1){
+    if (fillPack(pack, 0, buffUser, buffPass, NULL,0) == -1){
         return(-1);
     }
 

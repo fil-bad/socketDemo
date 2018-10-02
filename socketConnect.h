@@ -56,7 +56,7 @@ void *threadUser(thConnArg *);
 int readPack(int ds_sock, mail *pack);  // queste due funzioni prendono il pacchetto thread-specifico
 int writePack(int ds_sock, mail *pack); // ma all'interno contengono la struct mail con i dati
 
-int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex);
+int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int len);
 
 ///Server FUNCTION
 
@@ -76,3 +76,23 @@ int loginUserSide(int sock, mail *pack);
  *       il ToC parte dopo il FromC (che si occupa della fase di login inizialmente);
  *       vediamo se possiamo far spawnare un thread ad un altro thread, altrimenti usiamo un semaforo;
  */
+
+/* TIPI PACCHETTO
+ * type = 0 : LOGIN, mex non esiste (dim = 0)
+ * type = 1 :
+ *
+ *
+ *
+ */
+
+
+
+
+
+
+
+
+
+
+
+
