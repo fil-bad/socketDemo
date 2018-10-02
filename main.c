@@ -1,12 +1,20 @@
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "socketConnect.h"
+
+typedef struct thUserServ_{
+    int id;
+    char name[128];
+}thUserServ;
 
 
 void helpProject(void);
 int serverDemo(int argc, char *argv[]);
 int clientDemo(int argc, char *argv[]);
+void *threadUser(thConnArg *);
+
 
 
 
@@ -42,13 +50,29 @@ int serverDemo(int argc, char *argv[])
     if(initServer(con,atoi(argv[3])) == -1){
         exit(-1);
     }
+    pthread_t tid;
+    thUserServ *arg;
+    int i = 0;
     while(1){
-        if(acceptCreate(con,threadUser, NULL) == -1){
+        arg = malloc(sizeof(thUserServ));
+        arg->id = i;
+        if(acceptCreate(con,threadUser, arg) == -1) {
             exit(-1);
         }
+        i++;
     }
 
     return 0;
+}
+
+void *threadUser(thConnArg * argTh){
+    thUserServ *info = argTh->arg;
+    printf("Id = %d\n", info->id);
+    mail *pack = malloc(sizeof(mail));
+
+    loginServerSide(argTh->con.ds_sock, pack);
+    free(info);
+    free(argTh);
 }
 
 int clientDemo(int argc, char *argv[])

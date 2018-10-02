@@ -51,8 +51,6 @@ typedef struct thConnArg_{
 connection* initSocket(u_int16_t port, char* IP);
 void freeConnection(connection* con);
 
-void *threadUser(thConnArg *);
-
 int readPack(int ds_sock, mail *pack);  // queste due funzioni prendono il pacchetto thread-specifico
 int writePack(int ds_sock, mail *pack); // ma all'interno contengono la struct mail con i dati
 
@@ -61,7 +59,9 @@ int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int 
 ///Server FUNCTION
 
 int initServer(connection *connection, int coda);
+//tira su un th del tipo void th(thConnArg* info) e dentro info.arg viene messo argFx
 int acceptCreate(connection *connection,  void* (*threadUser)(void *),void *argFx);
+
 int loginServerSide(int sock, mail *pack);
 
 ///Client FUNCTION

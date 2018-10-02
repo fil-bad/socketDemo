@@ -64,12 +64,7 @@ void freeConnection(connection* con){
     free(con);
 }
 
-void *threadUser(thConnArg * argTh){
 
-    mail *pack = malloc(sizeof(mail));
-
-    loginServerSide(argTh->con.ds_sock, pack);
-}
 
 int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int len){
     pack->md.dim = len;
