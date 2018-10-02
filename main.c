@@ -116,11 +116,14 @@ int clientDemo(int argc, char *argv[])
         fflush(stdin);
 
         if (packSend->mex == NULL) goto antiSegFault;
+
+        //fillPack(packSend,1,"Utente_generico","testing_code",packsend->mex,strlen(packSend->mex)+1);
+
         packSend->md.dim=strlen(packSend->mex)+1;
         packSend->md.type=1;
-        strncpy(packSend->md.sender,"fattonia",28);
-        strncpy(packSend->md.whoOrWhy,"fattone",24);
-        printf("Stringa inserita: %s\n", packSend->mex);
+        strncpy(packSend->md.sender,"Utente_generico",28);
+        strncpy(packSend->md.whoOrWhy,"testing_code",24);
+        //printf("Stringa inserita: %s\n", packSend->mex);
         writePack(con->ds_sock,packSend);
         printPack(packSend);
 
