@@ -18,7 +18,7 @@ connection* initSocket(u_int16_t port, char* IP)
         con->sock.sin_addr.s_addr = INADDR_ANY;
     }
     else {
-        con->sock.sin_addr.s_addr = inet_addr("127.0.0.1");
+        con->sock.sin_addr.s_addr = inet_addr(IP);
     }
     return con;
 }
