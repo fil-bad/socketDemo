@@ -55,6 +55,7 @@ int readPack(int ds_sock, mail *pack);  // queste due funzioni prendono il pacch
 int writePack(int ds_sock, mail *pack); // ma all'interno contengono la struct mail con i dati
 
 int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int len);
+void printPack(mail *pack);
 
 ///Server FUNCTION
 

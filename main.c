@@ -13,7 +13,7 @@ typedef struct thUserServ_{
 void helpProject(void);
 int serverDemo(int argc, char *argv[]);
 int clientDemo(int argc, char *argv[]);
-void *threadUser(thConnArg *);
+void *thUserServer(thConnArg *);
 
 
 
@@ -45,18 +45,20 @@ int main(int argc, char *argv[])
 
 int serverDemo(int argc, char *argv[])
 {
+    printf("Server in avvio\n");
     con = initSocket(atoi(argv[2]),"INADDR_ANY");
-
+    printf("Socket inizializzato\n");
     if(initServer(con,atoi(argv[3])) == -1){
         exit(-1);
     }
+    printf("Server avviato\n");
     pthread_t tid;
     thUserServ *arg;
     int i = 0;
     while(1){
         arg = malloc(sizeof(thUserServ));
         arg->id = i;
-        if(acceptCreate(con,threadUser, arg) == -1) {
+        if(acceptCreate(con, thUserServer, arg) == -1) {
             exit(-1);
         }
         i++;
@@ -65,14 +67,35 @@ int serverDemo(int argc, char *argv[])
     return 0;
 }
 
-void *threadUser(thConnArg * argTh){
+void *thUserServer(thConnArg *argTh){
     thUserServ *info = argTh->arg;
-    printf("Id = %d\n", info->id);
+    printf("TH creato\nId = %d\n", info->id);
+
+    mail *packRecive= malloc(sizeof(mail));
+    printf("mi metto in ascolto\n");
+
+    do
+    {
+        readPack(argTh->con.ds_sock,packRecive);
+        printf("Numero byte pacchetto: %d\n",packRecive->md.dim);
+        
+        printf("Stringa da client: %s\n", packRecive->mex);
+    }
+    while(strcmp(packRecive->mex,"quit") != 0);
+
+    close(argTh->con.ds_sock);
+    free(info);
+    free(argTh);
+    pthread_exit(0);
+    
+    //todo: testare fase login
+    /*
     mail *pack = malloc(sizeof(mail));
 
     loginServerSide(argTh->con.ds_sock, pack);
-    free(info);
-    free(argTh);
+     */
+
+    
 }
 
 int clientDemo(int argc, char *argv[])
@@ -82,12 +105,31 @@ int clientDemo(int argc, char *argv[])
     if(initClient(con) == -1){
         exit(-1);
     }
-    mail *pack = malloc(sizeof(mail));
+    mail *packSend = malloc(sizeof(mail));
+    packSend->mex=malloc(4096);
 
-    if(loginUserSide(con->ds_sock,pack) == -1){
-        exit(-1);
+    do
+    {
+
+        antiSegFault:
+        scanf("%[^\n]", packSend->mex);
+        fflush(stdin);
+
+        if (packSend->mex == NULL) goto antiSegFault;
+        packSend->md.dim=strlen(packSend->mex)+1;
+        packSend->md.type=1;
+        strncpy(packSend->md.sender,"fattonia",28);
+        strncpy(packSend->md.whoOrWhy,"fattone",24);
+        printf("Stringa inserita: %s\n", packSend->mex);
+        writePack(con->ds_sock,packSend);
+        printPack(packSend);
+
+
     }
-
+    while(strcmp(packSend->mex,"quit") != 0);
+    free(packSend->mex);
+    free(packSend);
+    close(con->ds_sock);
     return 0;
 }
 

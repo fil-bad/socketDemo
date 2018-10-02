@@ -8,12 +8,18 @@
 connection* initSocket(u_int16_t port, char* IP)
 {
     connection *con = malloc(sizeof(connection));
+
     con->ds_sock = socket(AF_INET, SOCK_STREAM, 0);
-    bzero((char*)&con, sizeof(con));
+
+    bzero(&con->sock, sizeof(con->sock));
     con->sock.sin_family = AF_INET;
     con->sock.sin_port = htons(port);
-    if (strcmp(IP, "INADDR_ANY") == 0) con->sock.sin_addr.s_addr = INADDR_ANY;
-    else con->sock.sin_addr.s_addr = inet_addr("127.0.0.1");
+    if (strcmp(IP, "INADDR_ANY") == 0) {
+        con->sock.sin_addr.s_addr = INADDR_ANY;
+    }
+    else {
+        con->sock.sin_addr.s_addr = inet_addr("127.0.0.1");
+    }
     return con;
 }
 
@@ -24,8 +30,13 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
 
     ssize_t dimPack = sizeof(metadata) + pack->md.dim;
     do{
-        bWrite = write(ds_sock,pack+bWrite, dimPack - bWrite);
-    } while (dimPack-bWrite > 0);
+        bWrite += write(ds_sock,pack+bWrite, sizeof(metadata) - bWrite);
+    } while (sizeof(metadata)-bWrite != 0);
+
+    bWrite = 0;
+    do{
+        bWrite += write(ds_sock,pack->mex+bWrite, pack->md.dim - bWrite);
+    } while (pack->md.dim-bWrite != 0);
 
     return 0;
 }
@@ -33,15 +44,14 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
 int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
 {
     ssize_t bRead = 0;
-    metadata *mDServ = malloc(sizeof(metadata));
 
-    int dimMD = sizeof(metadata); // dimensione metadata, serve per prendere dati corretti in read;
     do{
-        bRead = read(ds_sock,mDServ+bRead, sizeof(mDServ)-bRead);
-    } while (dimMD-bRead > 0);
-    printf("Dim pack = %ld, Type = %d sender = %s, whoOrWhy = %s\n", mDServ->dim, mDServ->type,mDServ->sender,mDServ->whoOrWhy);
+        bRead += read(ds_sock,&pack->md+bRead, sizeof(metadata)-bRead);
+    } while (sizeof(metadata)-bRead != 0);
 
-    size_t dimMex = mDServ->dim;
+    printPack(pack);
+
+    size_t dimMex = pack->md.dim;
 
     if (dimMex == 0) {
         pack->mex = NULL;
@@ -52,8 +62,8 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
 
     bRead = 0; //rimetto a zero per la nuova lettura
     do{
-        bRead = read(ds_sock,pack->mex+bRead, sizeof(pack->mex)-bRead);
-    } while (dimMex-bRead > 0);
+        bRead += read(ds_sock,pack->mex+bRead, dimMex-bRead);
+    } while (dimMex-bRead != 0);
 
     printf("Message = %s\n",(char*)pack->mex);
 
@@ -75,8 +85,16 @@ int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int 
     return 0;
 }
 
-
-
+void printPack(mail *pack)
+{
+    printf("######[][]I METADATI SONO[][]######\n");
+    printf("Dim pack = %ld\n",pack->md.dim);
+    printf("Type = %d\n",pack->md.type);
+    printf("Sender = %s\n",pack->md.sender);
+    printf("whoOrWhy = %s\n",pack->md.whoOrWhy);
+    printf("------[][]IL MESSAGGIO[][]------\n");
+    printf("TEXT :\n--> %s\n",pack->mex); //non sempre stringa
+}
 ///Server FUNCTION
 
 int initServer(connection *c, int coda)
