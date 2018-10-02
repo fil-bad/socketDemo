@@ -82,7 +82,7 @@ void *thUserServer(thConnArg *argTh){
         printf("Stringa da client: %s\n", packRecive->mex);
     }
     while(strcmp(packRecive->mex,"quit") != 0);
-
+    printf("TH user %d in chiusura\n", info->id);
     close(argTh->con.ds_sock);
     free(info);
     free(argTh);
