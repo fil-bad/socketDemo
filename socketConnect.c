@@ -11,6 +11,19 @@ connection* initSocket(u_int16_t port, char* IP)
 
     con->ds_sock = socket(AF_INET, SOCK_STREAM, 0);
 
+    /// KEEPALIVE FUNCTION
+
+    int optval = 1;
+    socklen_t optlen = sizeof(optval);
+    if(setsockopt(con->ds_sock, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0) {
+        perror("setsockopt()");
+        close(con->ds_sock);
+        exit(EXIT_FAILURE);
+    }
+    printf("SO_KEEPALIVE set on socket\n");
+
+    /// END
+
     bzero(&con->sock, sizeof(con->sock));
     con->sock.sin_family = AF_INET;
     con->sock.sin_port = htons(port);
