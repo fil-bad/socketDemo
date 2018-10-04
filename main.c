@@ -18,7 +18,7 @@ void *thUserServer(thConnArg *);
 void *thrServRX(thConnArg *);
 void *thrServTX(thConnArg *);
 
-mail packTest;
+mail *packTest; /// necessaria per il test di sincronia
 
 sem_t sem[2];
 
@@ -67,6 +67,8 @@ int serverDemo(int argc, char *argv[])
     sem_init(&sem[0],0,1);
     sem_init(&sem[1],0,0);
 
+    packTest = malloc(sizeof(mail));
+
 
 
     while(1){
@@ -113,10 +115,10 @@ void *thrServRX(thConnArg *argTh){
 
         printf("Entro nel semaforo di andata\n");
 
-        readPack(argTh->con.ds_sock,&packTest);
-        printf("Numero byte pacchetto: %d\n",(&packTest)->md.dim);
-        printf("Stringa da client: %s\n", (&packTest)->mex);
-        if(strcmp((&packTest)->mex,"quit") == 0){
+        readPack(argTh->con.ds_sock,packTest);
+        printf("Numero byte pacchetto: %d\n",packTest->md.dim);
+        printf("Stringa da client: %s\n\n", packTest->mex);
+        if(strcmp(packTest->mex,"quit") == 0){
             break;
         }
 
@@ -142,7 +144,7 @@ void *thrServTX(thConnArg * argTh){
         sem_wait(&sem[1]);
         printf("Entro nel semaforo di ritorno\n");
 
-        writePack(argTh->con.ds_sock,&packTest);
+        writePack(argTh->con.ds_sock,packTest);
         if(errno){
             exit(-1);
         }
