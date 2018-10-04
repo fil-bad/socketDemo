@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 #include "socketConnect.h"
 
@@ -14,7 +15,12 @@ void helpProject(void);
 int serverDemo(int argc, char *argv[]);
 int clientDemo(int argc, char *argv[]);
 void *thUserServer(thConnArg *);
+void *thrServRX(thConnArg *);
+void *thrServTX(thConnArg *);
 
+mail packTest;
+
+sem_t sem[2];
 
 
 
@@ -55,6 +61,14 @@ int serverDemo(int argc, char *argv[])
     pthread_t tid;
     thUserServ *arg;
     int i = 0;
+
+
+    /// parte con semafori di test
+    sem_init(&sem[0],0,1);
+    sem_init(&sem[1],0,0);
+
+
+
     while(1){
         arg = malloc(sizeof(thUserServ));
         arg->id = i;
@@ -68,35 +82,77 @@ int serverDemo(int argc, char *argv[])
 }
 
 void *thUserServer(thConnArg *argTh){
-    thUserServ *info = argTh->arg;
+    thUserServ *info;
     printf("TH creato\nId = %d\n", info->id);
+    argTh->arg = info;
 
-    mail *packRecive= malloc(sizeof(mail));
+   // mail *packRecive= malloc(sizeof(mail));
     printf("mi metto in ascolto\n");
 
-    do
+    pthread_t tidRX, tidTX;
+
+    pthread_create(&tidRX,NULL, thrServRX,argTh);
+    pthread_create(&tidTX,NULL, thrServTX,argTh);
+
+    pause();
+    /*
+    loginServerSide(argTh->con.ds_sock, pack);
+     */
+    pthread_exit(NULL);
+}
+
+void *thrServRX(thConnArg *argTh){
+    //mail *packRecive= malloc(sizeof(mail));
+
+
+
+    thUserServ *info = argTh->arg;
+    while(1)
     {
-        readPack(argTh->con.ds_sock,packRecive);
-        printf("Numero byte pacchetto: %d\n",packRecive->md.dim);
-        
-        printf("Stringa da client: %s\n", packRecive->mex);
+        sem_wait(&sem[0]);
+
+        printf("Entro nel semaforo di andata\n");
+
+        readPack(argTh->con.ds_sock,&packTest);
+        printf("Numero byte pacchetto: %d\n",(&packTest)->md.dim);
+        printf("Stringa da client: %s\n", (&packTest)->mex);
+        if(strcmp((&packTest)->mex,"quit") == 0){
+            break;
+        }
+
+        sem_post(&sem[1]);
+
+        printf("Esco dal semaforo di ritorno\n");
+        //writePack(); da aggiungere il selettore chat
     }
-    while(strcmp(packRecive->mex,"quit") != 0);
     printf("TH user %d in chiusura\n", info->id);
     close(argTh->con.ds_sock);
     free(info);
     free(argTh);
     pthread_exit(0);
-    
-    //todo: testare fase login
-    /*
-    mail *pack = malloc(sizeof(mail));
-
-    loginServerSide(argTh->con.ds_sock, pack);
-     */
-
-    
 }
+
+void *thrServTX(thConnArg * argTh){
+    //mail *packSent= malloc(sizeof(mail));
+    thUserServ *info = argTh->arg;
+
+    while(1){
+        //readPack() da aggiungere il selettore in ingresso di chat
+
+        sem_wait(&sem[1]);
+        printf("Entro nel semaforo di ritorno\n");
+
+        writePack(argTh->con.ds_sock,&packTest);
+        if(errno){
+            exit(-1);
+        }
+
+
+        sem_post(&sem[0]);
+        printf("Esco dal semaforo di ritorno\n");
+    }
+}
+
 
 int clientDemo(int argc, char *argv[])
 {
@@ -106,6 +162,7 @@ int clientDemo(int argc, char *argv[])
         exit(-1);
     }
     mail *packSend = malloc(sizeof(mail));
+    mail *packReceive = malloc(sizeof(mail));
     //packSend->mex=malloc(4096);
 
     do
@@ -127,6 +184,12 @@ int clientDemo(int argc, char *argv[])
         writePack(con->ds_sock,packSend);
         printPack(packSend);
 
+        sleep(1);
+
+        printf("\n\n\n");
+
+        readPack(con->ds_sock, packReceive);
+        //printPack(packReceive);
 
     }
     while(strcmp(packSend->mex,"quit") != 0);

@@ -81,7 +81,7 @@ int fillPack(mail *pack, int type, char *sender, char *whoOrWhy, void *mex, int 
     pack->md.type = type;
     memcpy(pack->md.whoOrWhy, whoOrWhy, strlen(whoOrWhy));
     memcpy(pack->md.sender, sender, strlen(sender));
-    pack->mex = mex;
+    memcpy(pack->mex, mex, len);
     return 0;
 }
 
@@ -93,7 +93,7 @@ void printPack(mail *pack)
     printf("Sender = %s\n",pack->md.sender);
     printf("whoOrWhy = %s\n",pack->md.whoOrWhy);
     printf("------[][]IL MESSAGGIO[][]------\n");
-    printf("TEXT :\n--> %s\n",pack->mex); //non sempre stringa
+    printf("TEXT :\n--> %s\n\n",pack->mex); //non sempre stringa
 }
 ///Server FUNCTION
 
@@ -111,7 +111,7 @@ int initServer(connection *c, int coda)
     return 0;
 }
 
-int acceptCreate(connection *c,  void* (*threadUser)(void *),void *arg)
+int acceptCreate(connection *c,  void* (*thUserServer)(void *),void *arg)
 {
     // Si suppone che arg sia stata precedentemente malloccata
     connection *conNew;
@@ -127,7 +127,7 @@ int acceptCreate(connection *c,  void* (*threadUser)(void *),void *arg)
     thConnArg *argTh=malloc(sizeof(thConnArg));
     argTh->arg = arg;
     argTh->con = *conNew;
-    pthread_create(&tid,NULL,threadUser,argTh);
+    pthread_create(&tid,NULL,thUserServer,argTh);
     return 0;
 }
 

@@ -61,7 +61,7 @@ void printPack(mail *pack);
 
 int initServer(connection *connection, int coda);
 //tira su un th del tipo void th(thConnArg* info) e dentro info.arg viene messo argFx
-int acceptCreate(connection *connection,  void* (*threadUser)(void *),void *argFx);
+int acceptCreate(connection *connection,  void* (*thUserServer)(void *),void *argFx);
 
 int loginServerSide(int sock, mail *pack);
 
