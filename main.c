@@ -122,6 +122,7 @@ void *thrServRX(thConnArg *argTh){
             break;
         }
 
+
         sem_post(&sem[1]);
 
         printf("Esco dal semaforo di ritorno\n");
