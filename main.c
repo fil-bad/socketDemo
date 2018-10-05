@@ -18,7 +18,7 @@ void *thUserServer(thConnArg *);
 void *thrServRX(thConnArg *);
 void *thrServTX(thConnArg *);
 
-mail *packTest; /// necessaria per il test di sincronia
+//mail *packTest; /// necessaria per il test di sincronia
 
 sem_t sem[2];
 
@@ -52,11 +52,17 @@ int main(int argc, char *argv[])
 int serverDemo(int argc, char *argv[])
 {
     printf("Server in avvio\n");
+
     con = initSocket(atoi(argv[2]),"INADDR_ANY");
+    if (con == NULL){
+        exit(-1);
+    }
+
     printf("Socket inizializzato\n");
     if(initServer(con,atoi(argv[3])) == -1){
         exit(-1);
     }
+
     printf("Server avviato\n");
     pthread_t tid;
     thUserServ *arg;
@@ -67,12 +73,13 @@ int serverDemo(int argc, char *argv[])
     sem_init(&sem[0],0,1);
     sem_init(&sem[1],0,0);
 
-    packTest = malloc(sizeof(mail));
+    //packTest = malloc(sizeof(mail));
 
 
 
     while(1){
         arg = malloc(sizeof(thUserServ));
+        printf("arg = %p creato.\n", arg);
         arg->id = i;
         if(acceptCreate(con, thUserServer, arg) == -1) {
             exit(-1);
@@ -84,11 +91,14 @@ int serverDemo(int argc, char *argv[])
 }
 
 void *thUserServer(thConnArg *argTh){
-    thUserServ *info;
+    thUserServ *info=argTh->arg;
     printf("TH creato\nId = %d\n", info->id);
-    argTh->arg = info;
+    //argTh->arg = info;
 
-   // mail *packRecive= malloc(sizeof(mail));
+    mail *packRecive= malloc(sizeof(mail));
+
+    argTh->arg = packRecive;
+
     printf("mi metto in ascolto\n");
 
     pthread_t tidRX, tidTX;
@@ -106,9 +116,10 @@ void *thUserServer(thConnArg *argTh){
 void *thrServRX(thConnArg *argTh){
     //mail *packRecive= malloc(sizeof(mail));
 
+    //thUserServ *info = argTh->arg;
 
+    mail *packTest = argTh->arg;
 
-    thUserServ *info = argTh->arg;
     while(1)
     {
         sem_wait(&sem[0]);
@@ -128,16 +139,17 @@ void *thrServRX(thConnArg *argTh){
         printf("Esco dal semaforo di ritorno\n");
         //writePack(); da aggiungere il selettore chat
     }
-    printf("TH user %d in chiusura\n", info->id);
+   // printf("TH user %d in chiusura\n", info->id);
     close(argTh->con.ds_sock);
-    free(info);
+    //free(info);
     free(argTh);
     pthread_exit(0);
 }
 
 void *thrServTX(thConnArg * argTh){
     //mail *packSent= malloc(sizeof(mail));
-    thUserServ *info = argTh->arg;
+    //thUserServ *info = argTh->arg;
+    mail *packTest = argTh->arg;
 
     while(1){
         //readPack() da aggiungere il selettore in ingresso di chat

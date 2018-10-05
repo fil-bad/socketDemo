@@ -18,7 +18,7 @@ connection* initSocket(u_int16_t port, char* IP)
     if(setsockopt(con->ds_sock, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0) {
         perror("setsockopt()");
         close(con->ds_sock);
-        exit(EXIT_FAILURE);
+        return NULL;
     }
     printf("SO_KEEPALIVE set on socket\n");
 
@@ -62,8 +62,6 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
         bRead += read(ds_sock,&pack->md+bRead, sizeof(metadata)-bRead);
     } while (sizeof(metadata)-bRead != 0);
 
-    printPack(pack);
-
     size_t dimMex = pack->md.dim;
 
     if (dimMex == 0) {
@@ -78,7 +76,7 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
         bRead += read(ds_sock,pack->mex+bRead, dimMex-bRead);
     } while (dimMex-bRead != 0);
 
-    printf("Message = %s\n",(char*)pack->mex);
+    printPack(pack);
 
     return 0;
 }
@@ -126,10 +124,12 @@ int initServer(connection *c, int coda)
 
 int acceptCreate(connection *c,  void* (*thUserServer)(void *),void *arg)
 {
+    printf("Dentro accept\n");
     // Si suppone che arg sia stata precedentemente malloccata
     connection *conNew;
-    unsigned int len = sizeof(conNew->sock);
     conNew=malloc(sizeof(connection));
+    unsigned int len = sizeof(conNew->sock);
+
     conNew->ds_sock = accept(c->ds_sock,(struct sockaddr *) &conNew->sock, &len);
     if (conNew->ds_sock == -1){
         perror("Accept client error; cause:");
@@ -138,8 +138,14 @@ int acceptCreate(connection *c,  void* (*thUserServer)(void *),void *arg)
     }
     pthread_t tid;
     thConnArg *argTh=malloc(sizeof(thConnArg));
+
+    printf("arg prima e': %p\n", argTh->arg);
+
     argTh->arg = arg;
     argTh->con = *conNew;
+
+    printf("arg adesso e': %p\n", argTh->arg);
+
     pthread_create(&tid,NULL,thUserServer,argTh);
     return 0;
 }
