@@ -87,9 +87,18 @@ int loginUserSide(int sock, mail *pack);
  */
 
 
+/// ### DOCUMENTAZIONE ### ///
 
-
-
+/* SO_KEEPALIVE
+ *
+ * http://tldp.org/HOWTO/TCP-Keepalive-HOWTO/usingkeepalive.html
+ * Al paragrafo 3.1.1, e' mostrato come modificare il parametro temporale di sistema tramite CAT.
+ * Sara' necessario ridurre i tempi per rendersene conto;
+ * I cambiamenti dovranno essere impostati ad ogni avvio;
+ *
+ * E' POSSIBILE FARLO CON DEI VALORI DA MODIFICARE!!! VEDERE PARAGRAFO 4.2
+ *
+ */
 
 
 

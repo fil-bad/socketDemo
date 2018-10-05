@@ -11,7 +11,7 @@ connection* initSocket(u_int16_t port, char* IP)
 
     con->ds_sock = socket(AF_INET, SOCK_STREAM, 0);
 
-    /// KEEPALIVE FUNCTION
+    /// KEEPALIVE FUNCTION: vedere header per breve documentazione
 
     int optval = 1;
     socklen_t optlen = sizeof(optval);
