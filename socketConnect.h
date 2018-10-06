@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <stdio.h>
@@ -49,6 +50,7 @@ typedef struct thConnArg_{
 // GLOBALI
 
 connection* initSocket(u_int16_t port, char* IP);
+int keepAlive(int *ds_sock);
 void freeConnection(connection* con);
 
 int readPack(int ds_sock, mail *pack);  // queste due funzioni prendono il pacchetto thread-specifico

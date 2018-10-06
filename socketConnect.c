@@ -11,18 +11,9 @@ connection* initSocket(u_int16_t port, char* IP)
 
     con->ds_sock = socket(AF_INET, SOCK_STREAM, 0);
 
-    /// KEEPALIVE FUNCTION: vedere header per breve documentazione
-
-    int optval = 1;
-    socklen_t optlen = sizeof(optval);
-    if(setsockopt(con->ds_sock, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0) {
-        perror("setsockopt()");
-        close(con->ds_sock);
+    if(keepAlive(&con->ds_sock) == -1){
         return NULL;
-    }
-    printf("SO_KEEPALIVE set on socket\n");
-
-    /// END
+    };
 
     bzero(&con->sock, sizeof(con->sock));
     con->sock.sin_family = AF_INET;
@@ -36,6 +27,54 @@ connection* initSocket(u_int16_t port, char* IP)
     return con;
 }
 
+int keepAlive(int *ds_sock){
+    /// KEEPALIVE FUNCTION: vedere header per breve documentazione
+    int optval;
+    socklen_t optlen;
+    /// Impostamo i valori temporali degli ACK
+
+    // Tempo di primo ACK (tcp_keepalive_time)
+    optval = 30; //tempo in secondi
+    optlen = sizeof(optval);
+    if(setsockopt(*ds_sock, IPPROTO_TCP , TCP_KEEPIDLE, &optval, optlen) < 0) {
+        perror("setsockopt()");
+        close(*ds_sock);
+        return -1;
+    }
+
+    // Numero di "sonde" prima dell'abort (tcp_keepalive_probes)
+    optval = 5; // n. di tentativi
+    optlen = sizeof(optval);
+    if(setsockopt(*ds_sock, IPPROTO_TCP , TCP_KEEPCNT, &optval, optlen) < 0) {
+        perror("setsockopt()");
+        close(*ds_sock);
+        return -1;
+    }
+
+    //Tempo tra una sonda e l'altra (tcp_keepalive_intvl)
+    optval = 6; // tempo in secondi tra l'uno e l'altro
+    optlen = sizeof(optval);
+    if(setsockopt(*ds_sock, IPPROTO_TCP , TCP_KEEPINTVL, &optval, optlen) < 0) {
+        perror("setsockopt()");
+        close(*ds_sock);
+        return -1;
+    }
+
+    // IN CASO DI MANCATA RISPOSTA IN UN MINUTO, L'UTENTE RISULTERA' SCOLLEGATO!
+
+    // Attiviamo il keepalive
+    optval = 1;
+    optlen = sizeof(optval);
+    if(setsockopt(*ds_sock, SOL_SOCKET, SO_KEEPALIVE, &optval, optlen) < 0) {
+        perror("setsockopt()");
+        close(*ds_sock);
+        return -1;
+    }
+
+    printf("SO_KEEPALIVE set on socket\n");
+    return 0;
+}
+
 int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un mail
 {
     /// la funzione si aspetta che il buffer non sia modificato durante l'invio
@@ -43,12 +82,19 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
 
     ssize_t dimPack = sizeof(metadata) + pack->md.dim;
     do{
-        bWrite += write(ds_sock,pack+bWrite, sizeof(metadata) - bWrite);
+        bWrite += send(ds_sock,pack+bWrite, sizeof(metadata) - bWrite, MSG_NOSIGNAL);
+        if (errno == EPIPE){
+            //GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
+        }
+
     } while (sizeof(metadata)-bWrite != 0);
 
     bWrite = 0;
     do{
-        bWrite += write(ds_sock,pack->mex+bWrite, pack->md.dim - bWrite);
+        bWrite += send(ds_sock,pack->mex+bWrite, pack->md.dim - bWrite, MSG_NOSIGNAL);
+        if (errno == EPIPE){
+            //GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
+        }
     } while (pack->md.dim-bWrite != 0);
 
     return 0;
