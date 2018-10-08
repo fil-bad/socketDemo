@@ -139,7 +139,7 @@ void *thrServRX(thConnArg *argTh){
         printf("Esco dal semaforo di ritorno\n");
         //writePack(); da aggiungere il selettore chat
     }
-   // printf("TH user %d in chiusura\n", info->id);
+    // printf("TH user %d in chiusura\n", info->id);
     close(argTh->con.ds_sock);
     //free(info);
     free(argTh);

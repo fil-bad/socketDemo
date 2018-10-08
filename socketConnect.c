@@ -79,22 +79,31 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
 {
     /// la funzione si aspetta che il buffer non sia modificato durante l'invio
     ssize_t bWrite = 0;
+    ssize_t ret = 0;
 
     ssize_t dimPack = sizeof(metadata) + pack->md.dim;
     do{
-        bWrite += send(ds_sock,pack+bWrite, sizeof(metadata) - bWrite, MSG_NOSIGNAL);
-        if (errno == EPIPE){
-            //GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
+        ret = send(ds_sock,pack+bWrite, sizeof(metadata) - bWrite, MSG_NOSIGNAL);
+        if(ret == -1) {
+            if (errno == EPIPE) {
+                //GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
+            }
         }
+        bWrite += ret;
 
     } while (sizeof(metadata)-bWrite != 0);
 
     bWrite = 0;
+
     do{
-        bWrite += send(ds_sock,pack->mex+bWrite, pack->md.dim - bWrite, MSG_NOSIGNAL);
-        if (errno == EPIPE){
-            //GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
+        ret = send(ds_sock,pack->mex+bWrite, pack->md.dim - bWrite, MSG_NOSIGNAL);
+        if (ret == -1) {
+            if (errno == EPIPE) {
+                //GESTIRE LA CHIUSURA DEL SOCKET (LA CONNESSIONE E' STATA INTERROTTA IMPROVVISAMENTE)
+            }
         }
+        bWrite += ret;
+
     } while (pack->md.dim-bWrite != 0);
 
     return 0;
