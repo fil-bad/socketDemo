@@ -19,8 +19,8 @@
 #include <errno.h>
 #include <pthread.h>
 #include <poll.h>
+#include <signal.h>
 
-#define MAX_DIM 1024
 #define fflush(stdin) while(getchar() != '\n')
 
 typedef struct metadata_{

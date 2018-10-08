@@ -18,12 +18,7 @@ void *thUserServer(thConnArg *);
 void *thrServRX(thConnArg *);
 void *thrServTX(thConnArg *);
 
-//mail *packTest; /// necessaria per il test di sincronia
-
-sem_t sem[2];
-
-
-
+sem_t sem[2]; // test sincronia
 connection *con;
 
 int main(int argc, char *argv[])
@@ -73,8 +68,6 @@ int serverDemo(int argc, char *argv[])
     sem_init(&sem[0],0,1);
     sem_init(&sem[1],0,0);
 
-    //packTest = malloc(sizeof(mail));
-
 
 
     while(1){
@@ -93,14 +86,12 @@ int serverDemo(int argc, char *argv[])
 void *thUserServer(thConnArg *argTh){
     thUserServ *info=argTh->arg;
     printf("TH creato\nId = %d\n", info->id);
-    //argTh->arg = info;
 
     mail *packRecive= malloc(sizeof(mail));
 
     argTh->arg = packRecive;
 
     printf("mi metto in ascolto\n");
-
     pthread_t tidRX, tidTX;
 
     pthread_create(&tidRX,NULL, thrServRX,argTh);
@@ -114,41 +105,33 @@ void *thUserServer(thConnArg *argTh){
 }
 
 void *thrServRX(thConnArg *argTh){
-    //mail *packRecive= malloc(sizeof(mail));
-
-    //thUserServ *info = argTh->arg;
 
     mail *packTest = argTh->arg;
 
-    while(1)
-    {
+    while(1) {
         sem_wait(&sem[0]);
 
         printf("Entro nel semaforo di andata\n");
 
-        readPack(argTh->con.ds_sock,packTest);
-        printf("Numero byte pacchetto: %d\n",packTest->md.dim);
+        readPack(argTh->con.ds_sock, packTest);
+        printf("Numero byte pacchetto: %d\n", packTest->md.dim);
         printf("Stringa da client: %s\n\n", packTest->mex);
-        if(strcmp(packTest->mex,"quit") == 0){
+        if (strcmp(packTest->mex, "quit") == 0) {
             break;
         }
 
-
         sem_post(&sem[1]);
-
         printf("Esco dal semaforo di ritorno\n");
+
         //writePack(); da aggiungere il selettore chat
     }
-    // printf("TH user %d in chiusura\n", info->id);
     close(argTh->con.ds_sock);
-    //free(info);
     free(argTh);
     pthread_exit(0);
 }
 
 void *thrServTX(thConnArg * argTh){
-    //mail *packSent= malloc(sizeof(mail));
-    //thUserServ *info = argTh->arg;
+
     mail *packTest = argTh->arg;
 
     while(1){
@@ -178,7 +161,6 @@ int clientDemo(int argc, char *argv[])
     }
     mail *packSend = malloc(sizeof(mail));
     mail *packReceive = malloc(sizeof(mail));
-    //packSend->mex=malloc(4096);
 
     do
     {

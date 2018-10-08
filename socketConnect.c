@@ -81,7 +81,6 @@ int writePack(int ds_sock, mail *pack) //dentro il thArg deve essere puntato un 
     ssize_t bWrite = 0;
     ssize_t ret = 0;
 
-    ssize_t dimPack = sizeof(metadata) + pack->md.dim;
     do{
         ret = send(ds_sock,pack+bWrite, sizeof(metadata) - bWrite, MSG_NOSIGNAL);
         if(ret == -1) {
@@ -256,8 +255,6 @@ int loginUserSide(int ds_sock, mail *pack){
     writePack(ds_sock, pack);
 
     readPack(ds_sock,pack);
-
-
 
     return 0;
 }
