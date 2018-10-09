@@ -166,6 +166,7 @@ int clientDemo(int argc, char *argv[]) {
     mail *packSend = malloc(sizeof(mail));
     mail *packReceive = malloc(sizeof(mail));
 
+    /*
     int attempts = 5;
     while(1) {
         if (!attempts){
@@ -186,10 +187,12 @@ int clientDemo(int argc, char *argv[]) {
 
     pthread_t tid;
     pthread_create(&tid, NULL, thrUserRX, packReceive);
+    */
     do
     {
         free(packSend->mex);
         antiSegFault:
+        printf("\nInserire messaggio:");
         scanf("%m[^\n]", &packSend->mex);
         fflush(stdin);
 
@@ -205,12 +208,12 @@ int clientDemo(int argc, char *argv[]) {
         writePack(con->ds_sock,packSend);
         printPack(packSend);
 
-        sleep(1);
+        //sleep(1);
 
-        printf("\n\n\n");
+        printf("\n\nRitorno\n");
 
         readPack(con->ds_sock, packReceive);
-        //printPack(packReceive);
+        printPack(packReceive);
 
     }
     while(strcmp(packSend->mex,"quit") != 0);

@@ -130,7 +130,7 @@ int readPack(int ds_sock, mail *pack) //todo: implementare controllo sulle read
         bRead += read(ds_sock,pack->mex+bRead, dimMex-bRead);
     } while (dimMex-bRead != 0);
 
-    printPack(pack);
+    //printPack(pack);
 
     return 0;
 }
