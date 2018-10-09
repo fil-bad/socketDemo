@@ -213,6 +213,7 @@ int loginServerSide(int ds_sock, mail *pack){
     printf("Utente = %s\n",(char *)pack->mex);
     printf("Cerco corrispondenza utente e chat associate.\n");
 
+    /// DEFINIRE DOVE TROVARE GLI UTENTI
 
     writePack(ds_sock,pack);
 
@@ -237,8 +238,6 @@ int loginUserSide(int ds_sock, mail *pack){
 
     char buffUser[24];
     char buffPass[28];
-    memset(buffUser, 0, sizeof(buffUser));
-    memset(buffPass, 0, sizeof(buffPass));
 
     printf("Inserire credenziali per login.\nUtente: ");
     scanf("%s",buffUser);
@@ -251,10 +250,13 @@ int loginUserSide(int ds_sock, mail *pack){
     if (fillPack(pack, 0, buffUser, buffPass, NULL,0) == -1){
         return(-1);
     }
-
     writePack(ds_sock, pack);
 
     readPack(ds_sock,pack);
+
+
+
+    printf("Login effettuato\n");
 
     return 0;
 }

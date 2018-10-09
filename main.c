@@ -17,6 +17,8 @@ int clientDemo(int argc, char *argv[]);
 void *thUserServer(thConnArg *);
 void *thrServRX(thConnArg *);
 void *thrServTX(thConnArg *);
+void *thrUserRX(mail *);
+void *helperClient(int);
 
 sem_t sem[2]; // test sincronia
 connection *con;
@@ -89,6 +91,11 @@ void *thUserServer(thConnArg *argTh){
 
     mail *packRecive= malloc(sizeof(mail));
 
+    if(loginServerSide(argTh->con.ds_sock, packRecive) == -1){
+        printf("Login fallito; disconnessione...\n");
+        pthread_exit(NULL);
+    }  /// RIVEDERE LA PARTE DELL'IF, RIMANGONO TROPPI ACCEPT NON LIBERATI COMPLETAMENTE IN QUESTO MODO
+
     argTh->arg = packRecive;
 
     printf("mi metto in ascolto\n");
@@ -98,9 +105,6 @@ void *thUserServer(thConnArg *argTh){
     pthread_create(&tidTX,NULL, thrServTX,argTh);
 
     pause();
-    /*
-    loginServerSide(argTh->con.ds_sock, pack);
-     */
     pthread_exit(NULL);
 }
 
@@ -152,16 +156,36 @@ void *thrServTX(thConnArg * argTh){
 }
 
 
-int clientDemo(int argc, char *argv[])
-{
-    con = initSocket(atoi(argv[2]),argv[3]);
+int clientDemo(int argc, char *argv[]) {
+    con = initSocket(atoi(argv[2]), argv[3]);
 
-    if(initClient(con) == -1){
+    if (initClient(con) == -1) {
         exit(-1);
     }
+
     mail *packSend = malloc(sizeof(mail));
     mail *packReceive = malloc(sizeof(mail));
 
+    int attempts = 5;
+    while(1) {
+        if (!attempts){
+            printf("Troppi tentativi effettuati; chiusura programma...\n");
+            exit(-1);
+        }
+        if (loginUserSide(con->ds_sock, packSend) == -1) {
+            attempts--;
+            printf("Login fallito, tentativi rimasti: %d. Riprovare.\n",attempts);
+            continue;
+        }
+        else break;
+    }
+
+    signal(SIGINT, helperClient);
+    printf("Login Effettuato; per la lista di comandi, premere la combinazione CTRL+C\n");
+
+
+    pthread_t tid;
+    pthread_create(&tid, NULL, thrUserRX, packReceive);
     do
     {
         free(packSend->mex);
@@ -194,6 +218,15 @@ int clientDemo(int argc, char *argv[])
     free(packSend);
     close(con->ds_sock);
     return 0;
+}
+
+void* thrUserRX(mail *pack){
+
+}
+
+void *helperClient(int sig){
+    printf("Lista comandi per Client:\n\n");
+    // AGGIUNGERE TUTTE LE POSSIBILITA' DA CLIENT
 }
 
 void helpProject(void)
