@@ -76,7 +76,8 @@ int serverDemo(int argc, char *argv[])
         arg = malloc(sizeof(thUserServ));
         printf("arg = %p creato.\n", arg);
         arg->id = i;
-        if(acceptCreate(con, thUserServer, arg) == -1) {
+        if(acceptCreate(con, thUserServer, arg) == -1)
+        {
             exit(-1);
         }
         i++;

@@ -4,6 +4,7 @@
 
 #include "socketConnect.h"
 
+
 /// GLOBAL FUNCTION
 connection* initSocket(u_int16_t port, char* IP)
 {

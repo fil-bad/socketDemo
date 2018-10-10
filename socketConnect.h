@@ -23,6 +23,12 @@
 
 #define fflush(stdin) while(getchar() != '\n')
 
+enum typePack {
+    mess_p, login_p, logout_p, cmd_p, success_p,
+    failed_p, mkUser_p, dataUs_p, mkRoom_p, dataRm_p,
+    joinRm_p, exitRm_p
+};
+
 typedef struct metadata_{
     size_t dim;
     int type; // dobbiamo definire dei tipi di comandi: es. 0 per il login => password in campo mex, ...
